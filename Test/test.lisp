@@ -9,3 +9,10 @@
 (defun myLast (lst)
   (if (null (cdr lst)) lst
       (myLast (cdr lst))))
+
+
+
+(defun func (lst)
+  (cond ((null lst) '())
+	((listp (car lst)) (append (func (car lst)) (func (cdr lst))))
+	(t (append (list (car lst)) (func (cdr lst))))))
