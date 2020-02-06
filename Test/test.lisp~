@@ -1,0 +1,4 @@
+(defun Fuct (N)
+  (if (or (= N 1) (= N 0)) 1
+      (* N (Fuct (- N 1)))))
+
