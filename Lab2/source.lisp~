@@ -1,0 +1,6 @@
+(defun associative-list-add (lst key value)
+  (append lst (cons (key value))))
+
+
+
+
