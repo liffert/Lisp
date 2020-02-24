@@ -24,14 +24,14 @@
 
 (defun main ()
 
-  (let (lst '())
+  (let ((lst '()))
     (setf lst (property-list-add lst :a 1))
-    (setf lstp (property-list-add lst :b 2))
+    (setf lst (property-list-add lst :b 2))
     (print lst)
     (print (PROPERTY-LIST-GET lst :c))
     (print (property-list-get lst :b)))
 
-  (let (lst '())
+  (let ((lst '()))
     (setf lst (associative-list-add lst :a 1))
     (print lst)
     (setf lst (associative-list-add lst :b 23))
