@@ -5,7 +5,7 @@
 (defun associative-list-add (lst key value)
   (if (null (car (associative-list-get lst key)))
       (append lst (list (cons key value)))
-      (is_exist lst)))
+      (progn (print "aaa") lst)))
 
 (defun associative-list-get (lst key)
   (cond
@@ -83,5 +83,5 @@
     (print (binary-tree-get tree "c"))
     (print (binary-tree-get tree "s")))
     
-  '("End"))
+  "End")
 
