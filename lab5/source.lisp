@@ -73,6 +73,10 @@
 				       (%prod arg1 (differentiate var arg2)))
 				       (%expt arg2 2)))
 	   ((eq 'expt sign) (%dexpt var expr))
-	   ((eq 'sin sign) (%sin arg1))
-	   ((eq 'cos sign) (%cos arg1))
+	   ((eq 'sin sign) (%prod
+			    (%sin arg1)
+			    (differentiate var arg1)))
+	   ((eq 'cos sign) (%prod
+			    (%cos arg1)
+			    (differentiate var arg1)))
 	   ((eq 'log sign) (%div 1 arg1))))))))
