@@ -1,3 +1,8 @@
+(defun flatten (lst)
+  (cond ((null lst) '())
+	((listp (car lst)) (append (flatten (car lst)) (flatten (cdr lst))))
+	(t (cons (car lst) (flatten (cdr lst))))))
+
 (defun differentiate (var expr)
   (labels ((%sum (arg1 arg2)
 	     (cond
@@ -6,7 +11,7 @@
 	       (t (list '+ arg1 arg2))))
 	   (%minus (arg1 arg2)
 	     (cond
-	       ((eq arg1 0) arg2)
+	       ((eq arg1 0) (- arg2))
 	       ((eq arg2 0) arg1)
 	       (t (list '- arg1 arg2))))
 	   (%prod (arg1 arg2)
@@ -25,7 +30,31 @@
 	   (%sin (arg)
 	     (list 'cos arg))
 	   (%cos (arg)
-	     (list '- (list 'sin arg))))
+	     (list '- (list 'sin arg)))
+	   (%dexpt (var expr)
+	     (let
+		 ((arg1 (second expr))
+		  (arg2 (third expr)))
+	       (cond
+		 ((or (numberp arg1)
+		      (if (and (symbolp arg1)
+			       (eq arg1 var))
+			  nil
+			  t))
+		  (%prod (%expt arg1 arg2) (list 'log arg1)))
+		 ((and (or (numberp arg2)
+			   (if (and (symbolp arg2)
+				    (eq arg2 var))
+			       nil
+			       t))
+		       (eq arg1 var)
+		       (not (listp arg2)))
+		  (%prod arg2 (%expt arg1 (1- arg2))))
+		 (t (if (find var (flatten arg2))
+			(%prod
+			 (%expt arg1 arg2)
+			 (differentiate var (%prod arg2 (list 'log arg1))))
+			(%prod arg2 (%expt arg1 (list '1- arg2 )))))))))
   (cond
     ((numberp expr) 0)
     ((symbolp expr) (if (eq expr var) 1 0))
@@ -43,7 +72,7 @@
 	   ((eq '/ sign) (%div (%minus (%prod (differentiate var arg1) arg2)
 				       (%prod arg1 (differentiate var arg2)))
 				       (%expt arg2 2)))
-	   ((eq 'expt sign) (%prod arg2 (%expt arg1 (1- arg2))))
+	   ((eq 'expt sign) (%dexpt var expr))
 	   ((eq 'sin sign) (%sin arg1))
-	   ((eq 'cos sign) (%cos arg1)))))))
-  )
+	   ((eq 'cos sign) (%cos arg1))
+	   ((eq 'log sign) (%div 1 arg1))))))))
