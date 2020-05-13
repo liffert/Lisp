@@ -7,8 +7,8 @@
   (let
       ((signs '(+ - * / sin cos log expt)))
     (dolist (x lst)
-      (unless (numberp x) (unless (find x signs) (return-from find-symbols t))))
-    nil))
+      (unless (numberp x) (unless (find x signs) (return-from find-symbols nil))))
+    t))
 
 (defun differentiate (var expr)
   (labels ((%sum (arg1 arg2)
@@ -49,22 +49,26 @@
 			  nil
 			  t))
 		  (%prod (%expt arg1 arg2) (list 'log arg1)))
-		 ((and (or (numberp arg2)
-			   (if (and (symbolp arg2)
-				    (eq arg2 var))
-			       nil
-			       t))
+		 ((and (or (numberp arg2) (symbolp arg2))
 		       (eq arg1 var)
 		       (not (listp arg2)))
-		  (%prod arg2 (%expt arg1 (1- arg2))))
+		  (cond
+		    ((numberp arg2)
+		     (%prod arg2 (%expt arg1 (1- arg2))))
+		    ((eq arg2 var)
+		     (%prod
+		      (%expt arg1 arg2)
+		      (differentiate var (%prod arg2 (list 'log arg1)))))
+		    (t 
+		      (%prod arg2 (%expt arg1 (list '1- arg2))))))
 		 (t (cond
 		      ((find var (flatten arg2))
 			(%prod
 			 (%expt arg1 arg2)
 			 (differentiate var (%prod arg2 (list 'log arg1)))))
-		      ((find-symbols (flatten arg2)) 
-		       (%prod arg2 (%expt arg1 (list '1- arg2 ))))
-		      (t (%prod (eval arg2) (%expt arg1 (1- (eval arg2))))))
+		      ((find-symbols (flatten arg2))
+		       (%prod (eval arg2) (%expt arg1 (1- (eval arg2)))))
+		      (t (%prod  arg2 (%expt arg1 (list '1- arg2)))))
 		      )))))
   (cond
     ((numberp expr) 0)
