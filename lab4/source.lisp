@@ -33,12 +33,10 @@
       ((prev nil))
     (setf (container dict) (remove-if (lambda (x)
 					(when (eq (car x) key)
-					  (setf prev (cdr x))
+					  (setf prev x)
 					  t))
 				      (container dict)))
-    (if (eq prev nil)
-	(values nil nil)
-	(values prev t)))) 
+    (values (cdr prev) (not (null prev))))) 
 
 (defmethod dict-add ((dict binary-tree) key value)
   (labels
@@ -75,7 +73,8 @@
 
 (defmethod dict-delete ((dict binary-tree) key)
   (let
-      ((branches nil))
+      ((branches nil)
+       (deleted nil))
     (labels
 	((%del (tree key)
 	   (let
@@ -83,8 +82,10 @@
 		(Right (caddr tree))
 		(entry (car tree)))
 	     (cond
+	       ((null tree) tree)
 	       ((string= key (car entry))
 		(setf branches (list Left Right))
+		(setf deleted entry)
 		(setf tree nil))
 	       ((string< key (car entry)) (list entry (%del Left key) Right))
 	       ((string> key (car entry)) (list entry left (%del Right key)))
@@ -109,5 +110,6 @@
       (when (car branches)
 	(setf (container dict) (%add-branch (container dict) (car branches))))
       (when (cdr branches)
-	(setf (container dict) (%add-branch (container dict) (cadr branches))))))
+	(setf (container dict) (%add-branch (container dict) (cadr branches))))
+      (values (cdr deleted) (not (null deleted)))))
   )
